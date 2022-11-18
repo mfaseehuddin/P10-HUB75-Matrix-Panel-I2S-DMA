@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "*.ejs": "html",
-        "glcdfont.c": "cpp"
+        "glcdfont.c": "cpp",
+        "ostream": "cpp"
     }
 }

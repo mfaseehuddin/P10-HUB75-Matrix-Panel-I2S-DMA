@@ -161,7 +161,7 @@ struct Point_2
 
 
 
-		if (oY > 7 && oY < 13 || oY > 12 && oY < 17) // can this condition be simplified? -> if(oY >= 8 && oY <= 16)
+		if (oY >= 8 && oY <= 16) // can this condition be simplified? -> if(oY >= 8 && oY <= 16)
 		{
 			this->y = oY + 8;
 		}
@@ -193,7 +193,7 @@ int main()
             point p(x, y);
             Point_2 p2(x, y);
 
-            if(p.x != p2.x && p.y != p2.y)
+            if(p.x != p2.x || p.y != p2.y)
             {
                 cout << "Error at x: " << x << " y: " << y << endl;
                 p.debugPoint();

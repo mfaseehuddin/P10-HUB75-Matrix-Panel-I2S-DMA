@@ -9,6 +9,26 @@
 
 #endif
 
+#ifndef PANEL_HEIGHT_Y
+#define PANEL_HEIGHT_Y 16
+#endif
+#ifndef PANEL_WIDTH_X
+#define PANEL_WIDTH_X 32
+#endif
+#ifndef NUM_PANELS_X
+#define NUM_PANELS_X 1
+#endif
+#ifndef NUM_PANELS_Y
+#define NUM_PANELS_Y 1
+#endif
+
+#ifndef STACKING
+#define STACKING 0
+#endif
+
+#define PANEL32X16_WIDTH 32
+#define PANEL32X16_HEIGHT 16
+
 // what does ifndef do? -> it checks if the library is already defined, if not, it will define it. If it is defined, it will not define it again. This is to prevent redefinition of the library.
 // can we use ifndef for variables? -> yes, but it is not recommended. It is better to use #define to define variables. #define is a preprocessor directive, and it will replace the variable with the value. #ifndef is a compiler directive, and it will not compile the code if the variable is already defined.
 
@@ -20,6 +40,10 @@ class MatrixPanel32x16_I2S_DMA : public MatrixPanel_I2S_DMA
 
 private:
 public:
+    const uint8_t MatrixWidth = 32;
+    const uint8_t MatrixHeight = 16;
+    uint8_t psx;
+    uint8_t psy;
     MatrixPanel32x16_I2S_DMA(const HUB75_I2S_CFG &config) : MatrixPanel_I2S_DMA(config){};
 
     struct point
@@ -33,8 +57,40 @@ public:
         int y;
         point(int xIn, int yIn)
         {
-            oX = xIn;
-            oY = yIn;
+
+            int vX = xIn, vY = yIn;
+
+            // if (xIn > PANEL_WIDTH_X || yIn > PANEL_HEIGHT_Y)
+            // {
+            //     return;
+            // }
+
+            // map for chaining displays
+            /*
+                real -> virtual
+                (0,0) -> (0,0)
+                (31,31) -> (63, 15)
+                (0,31) -> (32, 15)
+                (31,0) -> (31,0)
+
+                does this mapping seem correct-> yes
+
+            */
+
+            // we use the above mapping to map the points to the virtual matrix, before using the below hardware mapping
+
+            // virtual mapping
+            // if (vY >= 16 && vY <= 31)
+            // {
+            //     vX += 32;
+            //     vY -= 16;
+            // }
+            
+            oX = vX;
+            oY = vY;
+
+            // hardware mapping
+
             // todo: define the oY to oX Calculation Mathematically
             oX += (oX / 8) * 8;
             // calculing x offset
@@ -277,7 +333,7 @@ public:
         }
     }
 
-    void drawIco(int *ico, int16_t x, int16_t y, int16_t rows, int16_t cols)
+    void drawImageBitmap(int *ico, int16_t x, int16_t y, int16_t rows, int16_t cols)
     {
         /*  drawIcon draws a C style bitmap.
  Example 10x5px bitmap of a yellow sun
@@ -296,13 +352,24 @@ public:
 */
 
         int i, j;
-        for (i = 0; i < cols; i++)
+        for (j = 0; j < rows; j++)
         {
-            for (j = 0; j < rows; j++)
+            for (i = 0; i < cols; i++)
             {
                 drawPixel(x + j, y + i, (uint16_t)(ico[i * rows + j]));
             }
         }
     }
-};
 
+    void drawImageRGB(int Image[][3], int16_t x, int16_t y, int16_t rows, int16_t cols)
+    {
+        int i, j;
+        for (i = 0; i < rows; i++)
+        {
+            for (j = 0; j < cols; j++)
+            {
+                drawPixel(x + j, y + i, color565(Image[i * rows + j][0], Image[i * rows + j][1], Image[i * rows + j][2]));
+            }
+        }
+    }
+};
